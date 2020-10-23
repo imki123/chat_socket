@@ -1,10 +1,12 @@
-var app = require('express')();
-var http = require('http').createServer(app);
+var app = require('express')()
+var http = require('http').createServer(app)
 
 app.get('/', (req, res) => {
-  res.send('<h1>Hello world</h1>');
-});
+	res.sendFile(__dirname + '/index.html')
+})
 
-http.listen(3000, () => {
-  console.log('listening on *:3000');
-});
+const port = process.env.PORT || 4000
+
+app.listen(port, () => {
+	console.log(`Listening on port: ${port}\nConnect to http://localhost:${port}`)
+})

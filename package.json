@@ -1,7 +1,7 @@
 {
-  "name": "onandoff_backend",
+  "name": "chat_socket",
   "version": "1.0.0",
-  "description": "Simple On-And-OFF using socket.io",
+  "description": "simple chat using socket.io",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",

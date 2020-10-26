@@ -10,6 +10,11 @@
 				padding: 0;
 				box-sizing: border-box;
 			}
+
+			button:hover, .hover:hover{
+				cursor: pointer;
+				opacity: 0.7;
+			}
 			body {
 				font: 0.9rem Helvetica, Arial;
 			}
@@ -111,7 +116,7 @@
 		<div class="msgs"></div>
 		<div class="chat">
 			<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
-			<div class="clientsLength" onclick="toggleClients()">0명</div>
+			<div class="clientsLength hover" onclick="toggleClients()">0명</div>
 			<button onclick="send()">Send</button>
 		</div>
 		<div class="allClientsWrapper" onclick="toggleClients()">

@@ -152,7 +152,7 @@
 			}
 
 			window.onload = function () {
-				const $ul = document.querySelector('.msgs')
+				const $msgs = document.querySelector('.msgs')
 				const $clientLength = document.querySelector('.clientsLength')
 				const $allClientsList = document.querySelector('.allClientsList')
 
@@ -166,9 +166,9 @@
 						const div = document.createElement('div')
 						div.classList.add('disconnect')
 						div.innerHTML = `${address}님이 나가셨습니다`
-						document.querySelector('.msgs').append(div)
+						$msgs.append(div)
 						//맨 아래로 스크롤하기
-						$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
+						$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight
 					}
 
 					$allClientsList.innerHTML = ''
@@ -183,22 +183,22 @@
 				//저장된 메시지 가져오기
 				socket.on('get msgs', function (msgs) {
 					let time = ''
+					$msgs.innerHTML = ''
 					for (let i of msgs) {
 						if (time.substring(0, 10) !== i.time.substring(0, 10)) {
 							time = i.time
 							const div = document.createElement('div')
 							div.classList.add('date')
 							div.innerHTML = `${i.time.substring(0, 10)}`
-							document.querySelector('.msgs').append(div)
+							$msgs.append(div)
 						}
 						const div = document.createElement('div')
 						div.classList.add('msg')
 						div.innerHTML = `${i.address} : ${i.msg} <span class="time">${i.time.substring(11)}</span>`
-						document.querySelector('.msgs').innerHTML = ''
-						document.querySelector('.msgs').append(div)
+						$msgs.append(div)
 					}
 					//맨 아래로 스크롤하기
-					$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
+					$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight
 				})
 
 				//접속하면 접속한 사람 아이디 보여주기
@@ -206,9 +206,9 @@
 					const div = document.createElement('div')
 					div.classList.add('connect')
 					div.innerHTML = `${text}`
-					document.querySelector('.msgs').append(div)
+					$msgs.append(div)
 					//맨 아래로 스크롤하기
-					$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
+					$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight
 				})
 
 				//날짜가 변경되면 날짜 표시
@@ -223,14 +223,14 @@
 						const div = document.createElement('div')
 						div.classList.add('date')
 						div.innerHTML = `${time.substring(0, 10)}`
-						document.querySelector('.msgs').append(div)
+						$msgs.append(div)
 					}
 					const div = document.createElement('div')
 					div.classList.add('msg')
 					div.innerHTML = `${address} : ${msg} <span class="time">${time.substring(11)}</span>`
-					document.querySelector('.msgs').append(div)
+					$msgs.append(div)
 					//맨 아래로 스크롤하기
-					$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
+					$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight
 				})
 			}
 		</script>

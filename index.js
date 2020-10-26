@@ -12,7 +12,10 @@ const msgs = []
 //make io
 io.on('connection', (socket) => {
 	let address = socket.handshake.address //get IP
-	address = address === '::1' ? 'admin' : 'guest' + address.split(':')[3].substring(7)
+	console.log(address.indexOf('.'))
+	let splited = address.split('.')
+	address = address === '::1' ? 'admin' : `guest(.${splited[2]}.${splited[3]})`
+	console.log(address)
 
 	//접속한 사람에게 저장된 메시지를 방출(emit), 인사문구
 	io.to(socket.id).emit('get msgs', msgs)

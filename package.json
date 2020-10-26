@@ -4,7 +4,7 @@
   "description": "simple chat using socket.io",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node index.js",
     "dev": "nodemon --watch / /index.js /index.html"
   },
   "keywords": [],

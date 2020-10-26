@@ -101,7 +101,7 @@
 						}
 						const div = document.createElement('div')
 						div.classList.add('msg')
-						div.innerHTML = `[${i.address}] ${i.msg} <span class="time">${i.time.substring(11)}</span>`
+						div.innerHTML = `${i.address} : ${i.msg} <span class="time">${i.time.substring(11)}</span>`
 						document.querySelector('.msgs').append(div)
 					}
 					//맨 아래로 스크롤하기
@@ -134,7 +134,7 @@
 					}
 					const div = document.createElement('div')
 					div.classList.add('msg')
-					div.innerHTML = `[${address}] ${msg} <span class="time">${time.substring(11)}</span>`
+					div.innerHTML = `${address} : ${msg} <span class="time">${time.substring(11)}</span>`
 					document.querySelector('.msgs').append(div)
 					//맨 아래로 스크롤하기
 					ul.scrollTop = ul.scrollHeight + ul.offsetHeight

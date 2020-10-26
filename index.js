@@ -11,8 +11,6 @@ app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/client/index.html')
 })
 
-const msgs = []
-
 //make io
 //io.origins(['http://localhost:4000','https://socket-imki123.herokuapp.com/'])
 io.origins((origin, callback) => {
@@ -21,10 +19,40 @@ io.origins((origin, callback) => {
 	}
 	callback(null, true)
 })
+
+const msgs = []
+const allClients = []
+
 io.on('connection', (socket) => {
+	//접속 시 접속자 수 증가
 	let address = socket.handshake.address //get IP
 	let splited = address.split('.')
 	address = address === '::1' ? 'admin' : `guest(.${splited[2]}.${splited[3]})`
+
+	allClients.push({socket, address})
+	io.emit('allClients', {num: allClients.length})
+
+	//접속해제 시 접속자 수 감소
+	socket.on('disconnect', function () {
+		console.log('Got disconnect!')
+		let num = allClients.length
+		let client
+		allClients.filter((i, idx) => {
+			if(i.socket === socket){
+				client = idx
+				return true
+			}else return false
+			
+		})
+		let clientAddress
+		if(client !== undefined) {
+			clientAddress = allClients.splice(client, 1)[0].address
+		}
+		console.log(clientAddress, allClients.length)
+		socket.broadcast.emit('allClients', {address: clientAddress, num: allClients.length})
+	})
+
+	
 
 	//접속한 사람에게 저장된 메시지를 방출(emit), 인사문구
 	io.to(socket.id).emit('get msgs', msgs)

@@ -13,28 +13,6 @@
 			body {
 				font: 0.9rem Helvetica, Arial;
 			}
-			.chat {
-				background: #000;
-				padding: 3px;
-				position: fixed;
-				bottom: 0;
-				height: 41px;
-				width: 100%;
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-			}
-			input {
-				border: 0;
-				padding: 10px;
-				width: 100%;
-				margin-right: 0.5%;
-			}
-			button {
-				background: rgb(130, 224, 255);
-				border: none;
-				padding: 10px;
-			}
 			.msgs {
 				position: fixed;
 				bottom: 41px;
@@ -56,9 +34,42 @@
 			.msgs .connect {
 				background: #ffff78;
 			}
+			.msgs .disconnect {
+				background: #ffffd0;
+			}
 			.msgs .time {
 				color: gray;
 				font-size: 0.7rem;
+			}
+			.chat {
+				background: #000;
+				padding: 3px;
+				position: fixed;
+				bottom: 0;
+				height: 41px;
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			input {
+				border: 0;
+				padding: 10px;
+				width: 100%;
+				margin-right: 5px;
+			}
+			.allClients {
+				background: white;
+				border: none;
+				padding: 9px;
+				margin-right: 5px;
+				min-width: 50px;
+				text-align: right;
+			}
+			button {
+				background: rgb(130, 224, 255);
+				border: none;
+				padding: 10px;
 			}
 		</style>
 	</head>
@@ -66,6 +77,7 @@
 		<div class="msgs"></div>
 		<div class="chat">
 			<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
+			<div class="allClients">0명</div>
 			<button onclick="send()">Send</button>
 		</div>
 
@@ -73,8 +85,9 @@
 		<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
 		<!-- <script src="/socket.io/socket.io.js"></script> -->
 		<script>
-			//var socket = io('http://localhost:4000')
-			var socket = io() //default: window.location
+			//connection event
+			const socket = io() //default: window.location
+
 			function send() {
 				let msg = document.querySelector('#chat')
 				if (msg.value.trim() === '') return
@@ -87,6 +100,21 @@
 
 			window.onload = function () {
 				const ul = document.querySelector('.msgs')
+				const allClients = document.querySelector('.allClients')
+
+				//접속된 사람 수 보여주기
+				socket.on('allClients', function ({ address, num }) {
+					allClients.innerHTML = num + '명'
+					//나간 사람 보여주기
+					if (address) {
+						const div = document.createElement('div')
+						div.classList.add('disconnect')
+						div.innerHTML = `${address}님이 나가셨습니다`
+						document.querySelector('.msgs').append(div)
+						//맨 아래로 스크롤하기
+						ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+					}
+				})
 
 				//저장된 메시지 가져오기
 				socket.on('get msgs', function (msgs) {
@@ -109,7 +137,6 @@
 				})
 
 				//접속하면 접속한 사람 아이디 보여주기
-
 				socket.on('new connect', function (text) {
 					const div = document.createElement('div')
 					div.classList.add('connect')
@@ -119,6 +146,7 @@
 					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
 				})
 
+				//날짜가 변경되면 날짜 표시
 				let date = new Date()
 				let today = date.getFullYear()
 				today += date.getMonth() < 10 ? '/0' + date.getMonth() : '/' + date.getMonth()

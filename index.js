@@ -22,37 +22,36 @@ io.origins((origin, callback) => {
 
 const msgs = []
 const allClients = []
+const clients = []
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
 	let address = socket.handshake.address //get IP
 	let splited = address.split('.')
-	address = address === '::1' ? 'admin' : `guest(.${splited[2]}.${splited[3]})`
+	address = address === '::1' ? 'admin' : `guest(${splited[2]}.${splited[3]})`
 
-	allClients.push({socket, address})
-	io.emit('allClients', {num: allClients.length})
+	allClients.push({ socket, address })
+	clients.push(address)
+	io.emit('allClients', { clients })
 
 	//접속해제 시 접속자 수 감소
 	socket.on('disconnect', function () {
-		console.log('Got disconnect!')
+		//console.log('Got disconnect!')
 		let num = allClients.length
 		let client
 		allClients.filter((i, idx) => {
-			if(i.socket === socket){
+			if (i.socket === socket) {
 				client = idx
 				return true
-			}else return false
-			
+			} else return false
 		})
 		let clientAddress
-		if(client !== undefined) {
+		if (client !== undefined) {
 			clientAddress = allClients.splice(client, 1)[0].address
+			clients.splice(client, 1)
 		}
-		console.log(clientAddress, allClients.length)
-		socket.broadcast.emit('allClients', {address: clientAddress, num: allClients.length})
+		socket.broadcast.emit('allClients', { address: clientAddress, clients })
 	})
-
-	
 
 	//접속한 사람에게 저장된 메시지를 방출(emit), 인사문구
 	io.to(socket.id).emit('get msgs', msgs)

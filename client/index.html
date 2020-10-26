@@ -16,7 +16,9 @@
 			.msgs {
 				position: fixed;
 				bottom: 41px;
+				z-index: 1;
 				width: 100%;
+				min-width: 300px;
 				max-height: calc(100vh - 41px);
 
 				list-style-type: none;
@@ -48,6 +50,8 @@
 				bottom: 0;
 				height: 41px;
 				width: 100%;
+				min-width: 300px;
+
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
@@ -58,7 +62,7 @@
 				width: 100%;
 				margin-right: 5px;
 			}
-			.allClients {
+			.clientsLength {
 				background: white;
 				border: none;
 				padding: 9px;
@@ -71,14 +75,50 @@
 				border: none;
 				padding: 10px;
 			}
+			.allClientsWrapper {
+				position: fixed;
+				bottom: 41px;
+				right: 0px;
+				z-index: 10;
+				display: none;
+
+				width: 100%;
+				height: calc(100% - 41px);
+				background: rgb(214, 214, 214, 0.5);
+			}
+			.allClientsWrapper.view {
+				display: block;
+			}
+			.allClients{
+				position: absolute;
+				bottom: 0px;
+				right: 0px;
+
+				padding: 10px;
+				width: 200px;
+				height: calc(50vh - 41px);
+				border: 1px solid black;
+				background: white;
+				overflow: auto;
+			}
+
+			.allClientsList{
+				margin-top: 10px;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="msgs"></div>
 		<div class="chat">
 			<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
-			<div class="allClients">0명</div>
+			<div class="clientsLength" onclick="toggleClients()">0명</div>
 			<button onclick="send()">Send</button>
+		</div>
+		<div class="allClientsWrapper" onclick="toggleClients()">
+			<div class="allClients">
+				<div>접속자 목록</div>
+				<div class="allClientsList"></div>
+			</div>
 		</div>
 
 		<!-- socket.io CDN -->
@@ -87,6 +127,7 @@
 		<script>
 			//connection event
 			const socket = io() //default: window.location
+			let allClients = []
 
 			function send() {
 				let msg = document.querySelector('#chat')
@@ -98,13 +139,23 @@
 				if (event.key === 'Enter') send()
 			}
 
+			//접속자수 클릭하면 클라이언트 목록 보여주기
+			function toggleClients() {
+				const $allClientsWrapper = document.querySelector('.allClientsWrapper')
+				if ($allClientsWrapper.classList.contains('view')) $allClientsWrapper.classList.remove('view')
+				else $allClientsWrapper.classList.add('view')
+			}
+
 			window.onload = function () {
-				const ul = document.querySelector('.msgs')
-				const allClients = document.querySelector('.allClients')
+				const $ul = document.querySelector('.msgs')
+				const $clientLength = document.querySelector('.clientsLength')
+				const $allClientsList = document.querySelector('.allClientsList')
 
 				//접속된 사람 수 보여주기
-				socket.on('allClients', function ({ address, num }) {
-					allClients.innerHTML = num + '명'
+				socket.on('allClients', function ({ address, clients }) {
+					//console.log(clients)
+					if (clients) allClients = clients
+					$clientLength.innerHTML = clients.length + '명'
 					//나간 사람 보여주기
 					if (address) {
 						const div = document.createElement('div')
@@ -112,7 +163,15 @@
 						div.innerHTML = `${address}님이 나가셨습니다`
 						document.querySelector('.msgs').append(div)
 						//맨 아래로 스크롤하기
-						ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+						$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
+					}
+
+					$allClientsList.innerHTML = ''
+					for (let i of allClients) {
+						const div = document.createElement('div')
+						div.classList.add('client')
+						div.innerHTML = `${i}`
+						$allClientsList.append(div)
 					}
 				})
 
@@ -133,7 +192,7 @@
 						document.querySelector('.msgs').append(div)
 					}
 					//맨 아래로 스크롤하기
-					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+					$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
 				})
 
 				//접속하면 접속한 사람 아이디 보여주기
@@ -143,7 +202,7 @@
 					div.innerHTML = `${text}`
 					document.querySelector('.msgs').append(div)
 					//맨 아래로 스크롤하기
-					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+					$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
 				})
 
 				//날짜가 변경되면 날짜 표시
@@ -165,7 +224,7 @@
 					div.innerHTML = `${address} : ${msg} <span class="time">${time.substring(11)}</span>`
 					document.querySelector('.msgs').append(div)
 					//맨 아래로 스크롤하기
-					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+					$ul.scrollTop = $ul.scrollHeight + $ul.offsetHeight
 				})
 			}
 		</script>

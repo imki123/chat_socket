@@ -1,8 +1,12 @@
-var app = require('express')()
-var http = require('http').createServer(app)
-var io = require('socket.io')(http)
+const app = require('express')()
+const favicon  = require('express-favicon')
+const http = require('http').createServer(app)
+const io = require('socket.io')(http)
 
-//open file
+//favicon 추가하기
+app.use(favicon(__dirname + '/client/favicon.ico'));
+
+//open client index
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/client/index.html')
 })

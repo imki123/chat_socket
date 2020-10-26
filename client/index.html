@@ -66,8 +66,8 @@
 		<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
 		<!-- <script src="/socket.io/socket.io.js"></script> -->
 		<script>
-			//var socket = io.connect('http://localhost:4000')
-			var socket = io.connect() //default: window.location
+			//var socket = io('http://localhost:4000')
+			var socket = io() //default: window.location
 			function send() {
 				let msg = document.querySelector('#chat')
 				if (msg.value.trim() === '') return

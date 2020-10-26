@@ -1,118 +1,119 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>Socket.IO chat</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font: 13px Helvetica, Arial;
-      }
-      .chat {
-        background: #000;
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        height: 41px;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      input {
-        border: 0;
-        padding: 10px;
-        width: 100%;
-        margin-right: 0.5%;
-      }
-      button {
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-      }
-      .msgs {
-        position: fixed;
-        bottom: 41px;
-        width: 100%;
-        max-height: calc(100vh - 41px);
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#000000" />
+		<title>Socket.IO chat</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				font: 13px Helvetica, Arial;
+			}
+			.chat {
+				background: #000;
+				padding: 3px;
+				position: fixed;
+				bottom: 0;
+				height: 41px;
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			input {
+				border: 0;
+				padding: 10px;
+				width: 100%;
+				margin-right: 0.5%;
+			}
+			button {
+				background: rgb(130, 224, 255);
+				border: none;
+				padding: 10px;
+			}
+			.msgs {
+				position: fixed;
+				bottom: 41px;
+				width: 100%;
+				max-height: calc(100vh - 41px);
 
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        overflow-y: auto;
-      }
-      .msgs .msg {
-        padding: 5px 10px;
-        width: 100%;
-      }
-      .msgs .msg:nth-child(odd) {
-        background: #eee;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="msgs"></div>
-    <div class="chat">
-      <input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
-      <button onclick="send()">Send</button>
-    </div>
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow-y: auto;
+			}
+			.msgs .msg {
+				padding: 5px 10px;
+				width: 100%;
+			}
+			.msgs .msg:nth-child(odd) {
+				background: #eee;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="msgs"></div>
+		<div class="chat">
+			<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
+			<button onclick="send()">Send</button>
+		</div>
 
-    <!-- socket.io CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
-    <!-- <script src="/socket.io/socket.io.js"></script> -->
-    <script>
-      var socket = io.connect("http://localhost:4000")
-      function send() {
-        let msg = document.querySelector("#chat")
-        if (msg.value.trim() === "") return
-        socket.emit("chat message", msg.value.trim())
-        msg.value = ""
-      }
-      function sendOnEnter(event) {
-        if (event.key === "Enter") send()
-      }
+		<!-- socket.io CDN -->
+		<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+		<!-- <script src="/socket.io/socket.io.js"></script> -->
+		<script>
+      //var socket = io.connect('http://localhost:4000')
+			var socket = io.connect() //default: window.location
+			function send() {
+				let msg = document.querySelector('#chat')
+				if (msg.value.trim() === '') return
+				socket.emit('chat message', msg.value.trim())
+				msg.value = ''
+			}
+			function sendOnEnter(event) {
+				if (event.key === 'Enter') send()
+			}
 
-      window.onload = function () {
-        const ul = document.querySelector(".msgs")
+			window.onload = function () {
+				const ul = document.querySelector('.msgs')
 
-        //저장된 메시지 가져오기
-        socket.on("get msgs", function (msgs) {
-          for (let i of msgs) {
-            const div = document.createElement("div")
-            div.classList.add("msg")
-            div.innerHTML = `[${i.address}] ${i.msg}`
-            document.querySelector(".msgs").append(div)
-          }
-          //맨 아래로 스크롤하기
-          ul.scrollTop = ul.scrollHeight + ul.offsetHeight
-        })
+				//저장된 메시지 가져오기
+				socket.on('get msgs', function (msgs) {
+					for (let i of msgs) {
+						const div = document.createElement('div')
+						div.classList.add('msg')
+						div.innerHTML = `[${i.address}] ${i.msg}`
+						document.querySelector('.msgs').append(div)
+					}
+					//맨 아래로 스크롤하기
+					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+				})
 
-        //접속하면 접속한 사람 아이디 보여주기
+				//접속하면 접속한 사람 아이디 보여주기
 
-        socket.on("new connect", function (text) {
-          const div = document.createElement("div")
-          div.classList.add("msg")
-          div.innerHTML = `${text}`
-          document.querySelector(".msgs").append(div)
-          //맨 아래로 스크롤하기
-          ul.scrollTop = ul.scrollHeight + ul.offsetHeight
-        })
+				socket.on('new connect', function (text) {
+					const div = document.createElement('div')
+					div.classList.add('msg')
+					div.innerHTML = `${text}`
+					document.querySelector('.msgs').append(div)
+					//맨 아래로 스크롤하기
+					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+				})
 
-        //메시지 하나 읽어오기
-        socket.on("chat message", function ({ address, msg }) {
-          const div = document.createElement("div")
-          div.classList.add("msg")
-          div.innerHTML = `[${address}] ${msg}`
-          document.querySelector(".msgs").append(div)
-          //맨 아래로 스크롤하기
-          ul.scrollTop = ul.scrollHeight + ul.offsetHeight
-        })
-      }
-    </script>
-  </body>
+				//메시지 하나 읽어오기
+				socket.on('chat message', function ({ address, msg }) {
+					const div = document.createElement('div')
+					div.classList.add('msg')
+					div.innerHTML = `[${address}] ${msg}`
+					document.querySelector('.msgs').append(div)
+					//맨 아래로 스크롤하기
+					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
+				})
+			}
+		</script>
+	</body>
 </html>

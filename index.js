@@ -14,11 +14,12 @@ io.on('connection', (socket) => {
 	let address = socket.handshake.address //get IP
 	address = address === '::1' ? 'admin' : 'guest' + address.split(':')[3].substring(7)
 
-	//처음 접속하면 기존 대화를 방출(emit)
+	//접속한 사람에게 저장된 메시지를 방출(emit), 인사문구
 	io.to(socket.id).emit('get msgs', msgs)
+	io.to(socket.id).emit('new connect', `${address}님 환영합니다 :D`)
 
-	//전체에게 접속한 사람 address를 방출
-	io.emit('new connect', `${address}님이 접속하셨습니다.`)
+	//나를 제외한 전체에게 접속한 사람 address를 방출
+	socket.broadcast.emit('new connect', `${address}님이 접속하셨습니다.`)
 
 	//메시지 입력 받으면 메시지를 msgs에 저장하고 입력 받은 메시지를 방출(emit)
 	socket.on('chat message', (msg) => {

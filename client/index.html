@@ -11,7 +11,7 @@
 				box-sizing: border-box;
 			}
 			body {
-				font: 13px Helvetica, Arial;
+				font: 0.9rem Helvetica, Arial;
 			}
 			.chat {
 				background: #000;
@@ -46,12 +46,19 @@
 				padding: 0;
 				overflow-y: auto;
 			}
-			.msgs .msg {
+			.msgs > * {
 				padding: 5px 10px;
 				width: 100%;
 			}
-			.msgs .msg:nth-child(odd) {
+			.msgs .date {
 				background: #eee;
+			}
+			.msgs .connect {
+				background: #ffff78;
+			}
+			.msgs .time {
+				color: gray;
+				font-size: 0.7rem;
 			}
 		</style>
 	</head>
@@ -83,10 +90,18 @@
 
 				//저장된 메시지 가져오기
 				socket.on('get msgs', function (msgs) {
+					let time = ''
 					for (let i of msgs) {
+						if (time.substring(0, 10) !== i.time.substring(0, 10)) {
+							time = i.time
+							const div = document.createElement('div')
+							div.classList.add('date')
+							div.innerHTML = `${i.time.substring(0, 10)}`
+							document.querySelector('.msgs').append(div)
+						}
 						const div = document.createElement('div')
 						div.classList.add('msg')
-						div.innerHTML = `[${i.address}] ${i.msg}`
+						div.innerHTML = `[${i.address}] ${i.msg} <span class="time">${i.time.substring(11)}</span>`
 						document.querySelector('.msgs').append(div)
 					}
 					//맨 아래로 스크롤하기
@@ -97,18 +112,29 @@
 
 				socket.on('new connect', function (text) {
 					const div = document.createElement('div')
-					div.classList.add('msg')
+					div.classList.add('connect')
 					div.innerHTML = `${text}`
 					document.querySelector('.msgs').append(div)
 					//맨 아래로 스크롤하기
 					ul.scrollTop = ul.scrollHeight + ul.offsetHeight
 				})
 
-				//메시지 하나 읽어오기
-				socket.on('chat message', function ({ address, msg }) {
+				let date = new Date()
+				let today = date.getFullYear()
+				today += date.getMonth() < 10 ? '/0' + date.getMonth() : '/' + date.getMonth()
+				today += date.getDate() < 10 ? '/0' + date.getDate() : '/' + date.getDate()
+				//메시지 받으면 화면에 그리기
+				socket.on('chat message', function ({ address, msg, time }) {
+					if (today.substring(0, 10) !== time.substring(0, 10)) {
+						today = time
+						const div = document.createElement('div')
+						div.classList.add('date')
+						div.innerHTML = `${time.substring(0, 10)}`
+						document.querySelector('.msgs').append(div)
+					}
 					const div = document.createElement('div')
 					div.classList.add('msg')
-					div.innerHTML = `[${address}] ${msg}`
+					div.innerHTML = `[${address}] ${msg} <span class="time">${time.substring(11)}</span>`
 					document.querySelector('.msgs').append(div)
 					//맨 아래로 스크롤하기
 					ul.scrollTop = ul.scrollHeight + ul.offsetHeight

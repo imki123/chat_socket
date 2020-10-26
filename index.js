@@ -1,10 +1,10 @@
 const app = require('express')()
-const favicon  = require('express-favicon')
+const favicon = require('express-favicon')
 const http = require('http').createServer(app)
 const io = require('socket.io')(http)
 
 //favicon 추가하기
-app.use(favicon(__dirname + '/client/favicon.ico'));
+app.use(favicon(__dirname + '/client/favicon.ico'))
 
 //open client index
 app.get('/', (req, res) => {
@@ -28,8 +28,14 @@ io.on('connection', (socket) => {
 
 	//메시지 입력 받으면 메시지를 msgs에 저장하고 입력 받은 메시지를 방출(emit)
 	socket.on('chat message', (msg) => {
-		msgs.push({ address, msg }) //msgs에 메시지들 저장
-		io.emit('chat message', { address, msg })
+		let date = new Date()
+		let time = date.getFullYear()
+		time += date.getMonth() < 10 ? '/0' + date.getMonth() : '/' + date.getMonth()
+		time += date.getDate() < 10 ? '/0' + date.getDate() : '/' + date.getDate()
+		time += date.getHours() < 10 ? ' 0' + date.getHours() : ' ' + date.getHours()
+		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()
+		msgs.push({ address, msg, time }) //msgs에 메시지들 저장
+		io.emit('chat message', { address, msg, time })
 	})
 })
 

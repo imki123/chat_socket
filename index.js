@@ -14,6 +14,13 @@ app.get('/', (req, res) => {
 const msgs = []
 
 //make io
+//io.origins(['http://localhost:4000','https://socket-imki123.herokuapp.com/'])
+io.origins((origin, callback) => {
+	if (origin !== 'http://localhost:4000' && origin !== 'https://socket-imki123.herokuapp.com') {
+		return callback(origin, 'origin not allowed', false)
+	}
+	callback(null, true)
+})
 io.on('connection', (socket) => {
 	let address = socket.handshake.address //get IP
 	let splited = address.split('.')

@@ -7,6 +7,29 @@
 	</head>
 	<body>
 		<div class="bodyWrapper">
+			<div class="board">
+				<div class="boardTitle"></div>
+				<div class="boardContent">
+					<div class="recent">
+						<div>최근 성공</div>
+						<div class="boardlist">
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+						</div>
+					</div>
+					<div class="week">
+						<div>일주일 랭킹</div>
+						<div class="boardlist">제작중</div>
+					</div>
+					<div class="month">
+						<div>한달 랭킹</div>
+						<div class="boardlist">제작중</div>
+					</div>
+				</div>
+			</div>
 			<div class="game">
 				<button onclick="clickButton(this)" id="button_0">ON</button>
 				<button onclick="clickButton(this)" id="button_1">ON</button>
@@ -22,7 +45,8 @@
 			<div class="chat">
 				<div class="msgs"></div>
 				<div class="inputs">
-					<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" placeholder="대화해보세요 :D"/>
+					<div class="client">guest</div>
+					<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" placeholder="대화해보세요 :D" />
 					<div class="clientsLength hover no-drag" onclick="toggleClients()">0명</div>
 					<button onclick="send()">Send</button>
 				</div>
@@ -34,7 +58,6 @@
 				</div>
 			</div>
 		</div>
-	
 
 		<style>
 			* {
@@ -52,7 +75,7 @@
 				-khtml-user-select: none;
 				user-select: none;
 			}
-			button{
+			button {
 				cursor: pointer;
 			}
 			.hover:hover {
@@ -77,6 +100,29 @@
 				max-width: 1000px;
 				min-width: 300px;
 			}
+			.board{
+				width: 100%;
+			}
+			.boardContent {
+				display: flex;
+				justify-content: space-around;
+				align-items: flex-start;
+				text-align: left;
+
+				width: 100%;
+				height: 150px;
+				background: green;
+			}
+			.boardContent>*{
+				width: 34%;
+				padding: 10px;
+				height: calc(100% - 1px);
+				border: 1px solid black;
+			}
+			.boardList{
+				width: 100%;
+			}
+
 			.game {
 				display: flex;
 				flex-wrap: wrap;
@@ -84,11 +130,11 @@
 				align-items: center;
 
 				width: 100%;
-				height: calc(50vh - 3px);
+				height: calc(40vh - 2px);
 				background: yellow;
 				border-bottom: 1px solid black;
 			}
-			.game button{
+			.game button {
 				width: 80px;
 				padding: 20px 10px;
 				margin: 1px;
@@ -99,19 +145,25 @@
 				border-radius: 20px;
 				outline: none;
 			}
-			.game button.off{
+			.game button.off {
 				background: black;
 				color: white;
 			}
-			.msgs {
+
+			.chat {
+				position: absolute;
+				bottom: 0;
 				width: 100%;
-				max-height: calc(50vh - 40px);
-				list-style-type: none;
-				overflow-y: auto;
 			}
 			.msgs > * {
 				padding: 5px 10px;
 				width: 100%;
+			}
+			.msgs {
+				width: 100%;
+				max-height: calc(60vh - 190px);
+				list-style-type: none;
+				overflow-y: auto;
 			}
 			.msgs .date {
 				background: #eee;
@@ -126,12 +178,8 @@
 				color: gray;
 				font-size: 0.7rem;
 			}
-			.chat {
-				position: absolute;
-				bottom: 0;
-				width: 100%;
-			}
-			.inputs{
+
+			.inputs {
 				background: #000;
 				padding: 3px;
 				height: 40px;
@@ -140,6 +188,14 @@
 				display: flex;
 				justify-content: space-between;
 				align-items: flex-end;
+			}
+			.inputs > * {
+				height: 33px;
+			}
+			.client {
+				background: white;
+				padding: 8px;
+				margin-right: 3px;
 			}
 			input {
 				border: 0;
@@ -152,7 +208,7 @@
 				border: none;
 				padding: 7px;
 				margin-right: 5px;
-				min-width: 50px;
+				min-width: 40px;
 				text-align: right;
 			}
 			.chat button {
@@ -201,12 +257,12 @@
 			let allClients = []
 
 			//버튼클릭하면 ON/OFF 바꾸고 소켓에 버튼 아이디 전송
-			function clickButton(button){
-				socket.emit('clickButton', button.id.replace('button_',''))
-				if(button.innerHTML === 'ON'){
+			function clickButton(button) {
+				socket.emit('clickButton', button.id.replace('button_', ''))
+				if (button.innerHTML === 'ON') {
 					button.innerHTML = 'OFF'
 					button.classList.add('off')
-				}else{
+				} else {
 					button.innerHTML = 'ON'
 					button.classList.remove('off')
 				}
@@ -236,22 +292,22 @@
 				const $allClientsList = document.querySelector('.allClientsList')
 
 				//버튼 배열 받기
-				socket.on('buttons', (buttons)=>{
+				socket.on('buttons', (buttons) => {
 					let same = true
 					let check = buttons[0]
-					for(let i=0; i<buttons.length; i++){
-						if(same && check !== buttons[i]) same = false
+					for (let i = 0; i < buttons.length; i++) {
+						if (same && check !== buttons[i]) same = false
 						button = document.querySelector(`#button_${i}`)
-						if(buttons[i]) {
-							button.innerHTML = "ON"
+						if (buttons[i]) {
+							button.innerHTML = 'ON'
 							button.classList.remove('off')
-						}else{
-							button.innerHTML = "OFF"
+						} else {
+							button.innerHTML = 'OFF'
 							button.classList.add('off')
 						}
 					}
-					if(same) {
-						if(check) $game.style.background = 'yellow'
+					if (same) {
+						if (check) $game.style.background = 'yellow'
 						else $game.style.background = 'gray'
 					}
 				})
@@ -302,10 +358,14 @@
 				})
 
 				//접속하면 접속한 사람 아이디 보여주기
-				socket.on('new connect', function (text) {
+				socket.on('new connect', ({ client, isMe }) => {
 					const div = document.createElement('div')
+					const $client = document.querySelector('.client')
 					div.classList.add('connect')
-					div.innerHTML = `${text}`
+					if (isMe) {
+						div.innerHTML = `${client}님 환영합니다 :D`
+						$client.innerHTML = client
+					} else div.innerHTML = `${client}님이 접속했습니다.`
 					$msgs.append(div)
 					//맨 아래로 스크롤하기
 					$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight

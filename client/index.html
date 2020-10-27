@@ -11,14 +11,14 @@
 				<div class="boardContent">
 					<div class="usage">
 						<div class="boardTitle">게임 방법</div>
-						<div class="boardlist">
+						<div class="boardList">
 							<div>- 불이 켜져 있을 때는 스위치를 모두 OFF로 바꿔야야합니다.</div>
 							<div>- 불이 꺼져 있을 때는 스위치를 모두 ON으로 바꿔야합니다.</div>
 						</div>
 					</div>
 					<div class="recent">
 						<div class="boardTitle">최근 성공</div>
-						<div class="boardlist">
+						<div class="boardList">
 							<div>제작중</div>
 							<div>제작중</div>
 							<div>제작중</div>
@@ -28,7 +28,7 @@
 					</div>
 					<div class="week">
 						<div class="boardTitle">일주일 랭킹</div>
-						<div class="boardlist">
+						<div class="boardList">
 							<div>제작중</div>
 							<div>제작중</div>
 							<div>제작중</div>
@@ -38,7 +38,7 @@
 					</div>
 					<div class="month">
 						<div class="boardTitle">한달 랭킹</div>
-						<div class="boardlist">
+						<div class="boardList">
 							<div>제작중</div>
 							<div>제작중</div>
 							<div>제작중</div>
@@ -132,8 +132,7 @@
 			}
 			.boardContent>*{
 				width: 25%;
-				padding: 2px;
-				height: calc(100% - 1px);
+				height: 100%;
 				overflow: auto;
 				border-right: 1px solid black;
 				border-bottom: 1px solid black;
@@ -144,9 +143,12 @@
 			.boardTitle{
 				font-weight: bold;
 				font-size: 1rem;
+				padding: 2px;
+				background: rgb(168, 255, 168);
 			}
-			.boardList{
+			.boardList div{
 				width: 100%;
+				padding: 0px 5px;
 			}
 
 			.game {
@@ -156,7 +158,7 @@
 				align-items: center;
 
 				width: 100%;
-				height: calc(40vh - 2px);
+				height: calc(40vh - 1px);
 				background: yellow;
 				border-bottom: 1px solid black;
 			}

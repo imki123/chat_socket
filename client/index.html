@@ -22,18 +22,19 @@
 			<div class="chat">
 				<div class="msgs"></div>
 				<div class="inputs">
-					<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
+					<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" placeholder="대화해보세요 :D"/>
 					<div class="clientsLength hover no-drag" onclick="toggleClients()">0명</div>
 					<button onclick="send()">Send</button>
 				</div>
+				<div class="allClientsWrapper" onclick="toggleClients()">
+					<div class="allClients">
+						<div>접속자 목록</div>
+						<div class="allClientsList"></div>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="allClientsWrapper" onclick="toggleClients()">
-			<div class="allClients">
-				<div>접속자 목록</div>
-				<div class="allClientsList"></div>
-			</div>
-		</div>
+	
 
 		<style>
 			* {
@@ -158,14 +159,14 @@
 				padding: 10px;
 			}
 			.allClientsWrapper {
-				position: fixed;
+				position: absolute;
 				bottom: 41px;
 				right: 0px;
 				z-index: 10;
 				display: none;
 
 				width: 100%;
-				height: calc(100% - 41px);
+				height: calc(100vh - 41px);
 				background: rgb(214, 214, 214, 0.5);
 			}
 			.allClientsWrapper.view {

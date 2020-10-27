@@ -23,7 +23,7 @@ io.origins((origin, callback) => {
 const msgs = []
 const allClients = []
 const clients = []
-const buttons = ['yellow',true, true, true, true, true, true, true, true, true, true]
+const buttons = ['yellow', true, true, true, true, true, true, true, true, true, true]
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
@@ -35,29 +35,28 @@ io.on('connection', (socket) => {
 	io.emit('buttons', buttons)
 
 	//버튼 클릭되면 토글해서 전파
-	socket.on('clickButton', (id)=>{
-		if(!isNaN(Number(id))) {
+	socket.on('clickButton', (id) => {
+		if (!isNaN(Number(id))) {
 			buttons[Number(id)] = !buttons[Number(id)]
 			let color = buttons[0]
 			let changeColor = true
-			for(let i=1; i<buttons.length; i++){
-				if(color === 'yellow'){ 
+			for (let i = 1; i < buttons.length; i++) {
+				if (color === 'yellow') {
 					//노랑일땐 OFF를 만들어야하므로
 					//true가 하나라도 있으면 changeColor = false
-					if(buttons[i]) changeColor = false
-				}else{
-					if(!buttons[i]) changeColor = false
+					if (buttons[i]) changeColor = false
+				} else {
+					if (!buttons[i]) changeColor = false
 				}
 			}
 			//버튼이 모두 같으면 색 변경
-			if(changeColor){
-				if(buttons[0] === 'yellow') buttons[0] = 'gray'
+			if (changeColor) {
+				if (buttons[0] === 'yellow') buttons[0] = 'gray'
 				else buttons[0] = 'yellow'
 			}
 			io.emit('buttons', buttons)
 		}
 	})
-
 
 	//접속자 목록 전파
 	allClients.push({ socket, address })
@@ -84,10 +83,10 @@ io.on('connection', (socket) => {
 
 	//접속한 사람에게 저장된 메시지를 방출(emit), 인사문구
 	io.to(socket.id).emit('get msgs', msgs)
-	io.to(socket.id).emit('new connect', {client: address, isMe: true})
+	io.to(socket.id).emit('new connect', { client: address, isMe: true })
 
 	//나를 제외한 전체에게 접속한 사람 address를 방출
-	socket.broadcast.emit('new connect', {client: address, isMe: false})
+	socket.broadcast.emit('new connect', { client: address, isMe: false })
 
 	//메시지 입력 받으면 메시지를 msgs에 저장하고 입력 받은 메시지를 방출(emit)
 	socket.on('chat message', (msg) => {
@@ -97,7 +96,7 @@ io.on('connection', (socket) => {
 		}
 
 		let time = date.getFullYear()
-		time += (date.getMonth()+1) < 10 ? '/0' + (date.getMonth()+1) : '/' + (date.getMonth()+1)
+		time += date.getMonth() + 1 < 10 ? '/0' + (date.getMonth() + 1) : '/' + (date.getMonth() + 1)
 		time += date.getDate() < 10 ? '/0' + date.getDate() : '/' + date.getDate()
 		time += date.getHours() < 10 ? ' 0' + date.getHours() : ' ' + date.getHours()
 		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()
@@ -113,7 +112,9 @@ http.listen(port, () => {
 })
 
 //heroku sleep 방지
-const myhttp = require('http')
-setInterval(function () {
-	myhttp.get('http://socket-imki123.herokuapp.com')
-}, 60000) //10분
+if (process.env.NODE_ENV === 'production') {
+	const myhttp = require('http')
+	setInterval(function () {
+		myhttp.get('http://socket-imki123.herokuapp.com')
+	}, 1000 * 60 * 10) //10분
+}

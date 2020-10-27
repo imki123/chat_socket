@@ -97,7 +97,7 @@ http.listen(port, () => {
 })
 
 //heroku sleep 방지
-const http = require('http')
+//const http = require('http')
 setInterval(function () {
 	http.get('http://socket-imki123.herokuapp.com')
 }, 600000) //10분

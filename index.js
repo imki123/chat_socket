@@ -24,6 +24,7 @@ const msgs = []
 const allClients = []
 const clients = []
 const buttons = ['yellow', true, true, true, true, true, true, true, true, true, true]
+const recents = []
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
@@ -53,6 +54,7 @@ io.on('connection', (socket) => {
 			if (changeColor) {
 				if (buttons[0] === 'yellow') buttons[0] = 'gray'
 				else buttons[0] = 'yellow'
+				//TODO : recents(최근 성공한 사람) 추가하고 emit하기 
 			}
 			io.emit('buttons', buttons)
 		}

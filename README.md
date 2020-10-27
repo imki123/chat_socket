@@ -1,5 +1,6 @@
 # OnAndOff
 OnAndOff is simple on-and-off game using socket.io  
+https://socket-imki123.herokuapp.com/
 
 ### How to run
 1. clone repository

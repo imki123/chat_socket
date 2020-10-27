@@ -8,10 +8,16 @@
 	<body>
 		<div class="bodyWrapper">
 			<div class="board">
-				<div class="boardTitle"></div>
 				<div class="boardContent">
+					<div class="usage">
+						<div class="boardTitle">게임 방법</div>
+						<div class="boardlist">
+							<div>- 불이 켜져 있을 때는 스위치를 모두 OFF로 바꿔야야합니다.</div>
+							<div>- 불이 꺼져 있을 때는 스위치를 모두 ON으로 바꿔야합니다.</div>
+						</div>
+					</div>
 					<div class="recent">
-						<div>최근 성공</div>
+						<div class="boardTitle">최근 성공한 사람</div>
 						<div class="boardlist">
 							<div>제작중</div>
 							<div>제작중</div>
@@ -21,12 +27,24 @@
 						</div>
 					</div>
 					<div class="week">
-						<div>일주일 랭킹</div>
-						<div class="boardlist">제작중</div>
+						<div class="boardTitle">일주일 랭킹</div>
+						<div class="boardlist">
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+						</div>
 					</div>
 					<div class="month">
-						<div>한달 랭킹</div>
-						<div class="boardlist">제작중</div>
+						<div class="boardTitle">한달 랭킹</div>
+						<div class="boardlist">
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+							<div>제작중</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -110,14 +128,21 @@
 				text-align: left;
 
 				width: 100%;
-				height: 150px;
-				background: green;
+				height: 120px;
 			}
 			.boardContent>*{
-				width: 34%;
-				padding: 10px;
+				width: 25%;
+				padding: 2px;
 				height: calc(100% - 1px);
-				border: 1px solid black;
+				border-right: 1px solid black;
+				border-bottom: 1px solid black;
+			}
+			.boardContent div:nth-child(4){
+				border-right: 0;
+			}
+			.boardTitle{
+				font-weight: bold;
+				font-size: 1rem;
 			}
 			.boardList{
 				width: 100%;
@@ -161,7 +186,7 @@
 			}
 			.msgs {
 				width: 100%;
-				max-height: calc(60vh - 190px);
+				max-height: calc(60vh - 160px);
 				list-style-type: none;
 				overflow-y: auto;
 			}

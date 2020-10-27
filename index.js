@@ -23,7 +23,7 @@ io.origins((origin, callback) => {
 const msgs = []
 const allClients = []
 const clients = []
-const buttons = [true, true, true, true, true, true, true, true, true, true]
+const buttons = ['yellow',true, true, true, true, true, true, true, true, true, true]
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
@@ -38,6 +38,20 @@ io.on('connection', (socket) => {
 	socket.on('clickButton', (id)=>{
 		if(!isNaN(Number(id))) {
 			buttons[Number(id)] = !buttons[Number(id)]
+			let color = buttons[0]
+			let changeColor = true
+			for(let i=1; i<buttons.length; i++){
+				if(color === 'yellow'){ 
+					//노랑일땐 OFF를 만들어야하므로
+					//true가 하나라도 있으면 changeColor = false
+					if(buttons[i]) changeColor = false
+				}else{
+					if(!buttons[i]) changeColor = false
+				}
+			}
+			if(changeColor){
+
+			}
 			io.emit('buttons', buttons)
 		}
 	})
@@ -97,7 +111,7 @@ http.listen(port, () => {
 })
 
 //heroku sleep 방지
-//const http = require('http')
+const myhttp = require('http')
 setInterval(function () {
-	http.get('http://socket-imki123.herokuapp.com')
+	myhttp.get('http://socket-imki123.herokuapp.com')
 }, 600000) //10분

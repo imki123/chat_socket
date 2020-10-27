@@ -116,4 +116,4 @@ http.listen(port, () => {
 const myhttp = require('http')
 setInterval(function () {
 	myhttp.get('http://socket-imki123.herokuapp.com')
-}, 600000) //10분
+}, 60000) //10분

@@ -23,6 +23,7 @@ io.origins((origin, callback) => {
 const msgs = []
 const allClients = []
 const clients = []
+const buttons = [true, true, true, true, true, true, true, true, true, true]
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
@@ -30,13 +31,25 @@ io.on('connection', (socket) => {
 	let splited = address.split('.')
 	address = address === '::1' ? 'admin' : `guest(${splited[2]}.${splited[3]})`
 
+	//버튼 전파
+	io.emit('buttons', buttons)
+
+	//버튼 클릭되면 토글해서 전파
+	socket.on('clickButton', (id)=>{
+		if(!isNaN(Number(id))) {
+			buttons[Number(id)] = !buttons[Number(id)]
+			io.emit('buttons', buttons)
+		}
+	})
+
+
+	//접속자 목록 전파
 	allClients.push({ socket, address })
 	clients.push(address)
 	io.emit('allClients', { clients })
 
 	//접속해제 시 접속자 수 감소
 	socket.on('disconnect', function () {
-		//console.log('Got disconnect!')
 		let num = allClients.length
 		let client
 		allClients.filter((i, idx) => {

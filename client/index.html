@@ -3,7 +3,38 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#000000" />
-		<title>Chat-imki123</title>
+		<title>OnAndOff-imki123</title>
+	</head>
+	<body>
+		<div class="bodyWrapper">
+			<div class="game">
+				<button onclick="clickButton(this)" id="button_0">ON</button>
+				<button onclick="clickButton(this)" id="button_1">ON</button>
+				<button onclick="clickButton(this)" id="button_2">ON</button>
+				<button onclick="clickButton(this)" id="button_3">ON</button>
+				<button onclick="clickButton(this)" id="button_4">ON</button>
+				<button onclick="clickButton(this)" id="button_5">ON</button>
+				<button onclick="clickButton(this)" id="button_6">ON</button>
+				<button onclick="clickButton(this)" id="button_7">ON</button>
+				<button onclick="clickButton(this)" id="button_8">ON</button>
+				<button onclick="clickButton(this)" id="button_9">ON</button>
+			</div>
+			<div class="chat">
+				<div class="msgs"></div>
+				<div class="inputs">
+					<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
+					<div class="clientsLength hover no-drag" onclick="toggleClients()">0명</div>
+					<button onclick="send()">Send</button>
+				</div>
+			</div>
+		</div>
+		<div class="allClientsWrapper" onclick="toggleClients()">
+			<div class="allClients">
+				<div>접속자 목록</div>
+				<div class="allClientsList"></div>
+			</div>
+		</div>
+
 		<style>
 			* {
 				margin: 0;
@@ -11,24 +42,68 @@
 				box-sizing: border-box;
 			}
 
-			button:hover, .hover:hover{
+			button,
+			img,
+			.no-drag {
+				-ms-user-select: none;
+				-moz-user-select: -moz-none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				user-select: none;
+			}
+			button:hover,
+			.hover:hover {
 				cursor: pointer;
-				opacity: 0.7;
+				opacity: 0.8;
 			}
 			body {
 				font: 0.9rem Helvetica, Arial;
 			}
-			.msgs {
-				position: fixed;
-				bottom: 41px;
-				z-index: 1;
-				width: 100%;
-				min-width: 300px;
-				max-height: calc(100vh - 41px);
 
+			.bodyWrapper {
+				position: relative;
+				width: 100%;
+				height: 100vh;
+				margin: auto;
+				display: flex;
+				justify-content: flex-start;
+				align-items: flex-start;
+				flex-wrap: wrap;
+				flex-direction: column;
+				border: 1px solid black;
+				max-width: 1000px;
+				min-width: 300px;
+			}
+			.game {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				align-items: center;
+
+				width: 100%;
+				height: calc(50vh - 3px);
+				background: yellow;
+				border-bottom: 1px solid black;
+			}
+			.game button{
+				width: 80px;
+				padding: 20px 10px;
+				margin: 1px;
+				font-size: 1.5rem;
+				font-weight: bold;
+				background: white;
+				color: black;
+				border-radius: 20px;
+				outline: none;
+			}
+			.game button.off{
+				background: black;
+				color: white;
+			}
+			.msgs {
+				width: 100%;
+				max-height: calc(50vh - 41px);
 				list-style-type: none;
-				margin: 0;
-				padding: 0;
 				overflow-y: auto;
 			}
 			.msgs > * {
@@ -49,17 +124,19 @@
 				font-size: 0.7rem;
 			}
 			.chat {
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+			}
+			.inputs{
 				background: #000;
 				padding: 3px;
-				position: fixed;
-				bottom: 0;
 				height: 41px;
 				width: 100%;
-				min-width: 300px;
 
 				display: flex;
 				justify-content: space-between;
-				align-items: center;
+				align-items: flex-end;
 			}
 			input {
 				border: 0;
@@ -70,12 +147,12 @@
 			.clientsLength {
 				background: white;
 				border: none;
-				padding: 9px;
+				padding: 8px;
 				margin-right: 5px;
 				min-width: 50px;
 				text-align: right;
 			}
-			button {
+			.chat button {
 				background: rgb(130, 224, 255);
 				border: none;
 				padding: 10px;
@@ -94,7 +171,7 @@
 			.allClientsWrapper.view {
 				display: block;
 			}
-			.allClients{
+			.allClients {
 				position: absolute;
 				bottom: 0px;
 				right: 0px;
@@ -107,24 +184,10 @@
 				overflow: auto;
 			}
 
-			.allClientsList{
+			.allClientsList {
 				margin-top: 10px;
 			}
 		</style>
-	</head>
-	<body>
-		<div class="msgs"></div>
-		<div class="chat">
-			<input id="chat" autocomplete="off" onkeypress="sendOnEnter(event)" />
-			<div class="clientsLength hover" onclick="toggleClients()">0명</div>
-			<button onclick="send()">Send</button>
-		</div>
-		<div class="allClientsWrapper" onclick="toggleClients()">
-			<div class="allClients">
-				<div>접속자 목록</div>
-				<div class="allClientsList"></div>
-			</div>
-		</div>
 
 		<!-- socket.io CDN -->
 		<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
@@ -133,6 +196,18 @@
 			//connection event
 			const socket = io() //default: window.location
 			let allClients = []
+
+			//버튼클릭하면 ON/OFF 바꾸고 소켓에 버튼 아이디 전송
+			function clickButton(button){
+				socket.emit('clickButton', button.id.replace('button_',''))
+				if(button.innerHTML === 'ON'){
+					button.innerHTML = 'OFF'
+					button.classList.add('off')
+				}else{
+					button.innerHTML = 'ON'
+					button.classList.remove('off')
+				}
+			}
 
 			function send() {
 				let msg = document.querySelector('#chat')
@@ -152,9 +227,31 @@
 			}
 
 			window.onload = function () {
+				const $game = document.querySelector('.game')
 				const $msgs = document.querySelector('.msgs')
 				const $clientLength = document.querySelector('.clientsLength')
 				const $allClientsList = document.querySelector('.allClientsList')
+
+				//버튼 배열 받기
+				socket.on('buttons', (buttons)=>{
+					let same = true
+					let check = buttons[0]
+					for(let i=0; i<buttons.length; i++){
+						if(same && check !== buttons[i]) same = false
+						button = document.querySelector(`#button_${i}`)
+						if(buttons[i]) {
+							button.innerHTML = "ON"
+							button.classList.remove('off')
+						}else{
+							button.innerHTML = "OFF"
+							button.classList.add('off')
+						}
+					}
+					if(same) {
+						if(check) $game.style.background = 'yellow'
+						else $game.style.background = 'gray'
+					}
+				})
 
 				//접속된 사람 수 보여주기
 				socket.on('allClients', function ({ address, clients }) {

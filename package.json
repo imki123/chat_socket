@@ -1,7 +1,7 @@
 {
-  "name": "Chat-imki123",
+  "name": "onandoff-imki123",
   "version": "1.0.0",
-  "description": "simple chat using socket.io",
+  "description": "간단한 OnAndOff 게임입니다 :D",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

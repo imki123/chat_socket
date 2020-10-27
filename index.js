@@ -49,8 +49,10 @@ io.on('connection', (socket) => {
 					if(!buttons[i]) changeColor = false
 				}
 			}
+			//버튼이 모두 같으면 색 변경
 			if(changeColor){
-
+				if(buttons[0] === 'yellow') buttons[0] = 'gray'
+				else buttons[0] = 'yellow'
 			}
 			io.emit('buttons', buttons)
 		}

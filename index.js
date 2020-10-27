@@ -26,9 +26,7 @@ const clients = []
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
-	console.log(socket.request.connection.remoteAddress, socket.handshake.address)
 	let address = socket.handshake.address //get IP
-	address = socket.request.connection.remoteAddress
 	let splited = address.split('.')
 	address = address === '::1' ? 'admin' : `guest(${splited[2]}.${splited[3]})`
 

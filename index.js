@@ -81,7 +81,7 @@ io.on('connection', (socket) => {
 		}
 
 		let time = date.getFullYear()
-		time += date.getMonth() < 10 ? '/0' + date.getMonth() : '/' + date.getMonth()
+		time += date.getMonth() < 10 ? '/0' + (date.getMonth()+1) : '/' + (date.getMonth()+1)
 		time += date.getDate() < 10 ? '/0' + date.getDate() : '/' + date.getDate()
 		time += date.getHours() < 10 ? ' 0' + date.getHours() : ' ' + date.getHours()
 		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()

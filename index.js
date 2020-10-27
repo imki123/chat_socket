@@ -95,3 +95,9 @@ const port = process.env.PORT || 4000
 http.listen(port, () => {
 	console.log(`Listening on port: ${port}\nConnect to http://localhost:${port}`)
 })
+
+//heroku sleep 방지
+const http = require('http')
+setInterval(function () {
+	http.get('http://socket-imki123.herokuapp.com')
+}, 600000) //10분

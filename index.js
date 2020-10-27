@@ -26,7 +26,9 @@ const clients = []
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
+	console.log(socket.request.connection.remoteAddress, socket.handshake.address)
 	let address = socket.handshake.address //get IP
+	address = socket.request.connection.remoteAddress
 	let splited = address.split('.')
 	address = address === '::1' ? 'admin' : `guest(${splited[2]}.${splited[3]})`
 
@@ -63,10 +65,10 @@ io.on('connection', (socket) => {
 	//메시지 입력 받으면 메시지를 msgs에 저장하고 입력 받은 메시지를 방출(emit)
 	socket.on('chat message', (msg) => {
 		let date = new Date()
-		if(process.env.NODE_ENV === 'production'){
+		if (process.env.NODE_ENV === 'production') {
 			date.setHours(date.getHours() + 9) //한국시간 : UTC + 9시간
 		}
-		
+
 		let time = date.getFullYear()
 		time += date.getMonth() < 10 ? '/0' + date.getMonth() : '/' + date.getMonth()
 		time += date.getDate() < 10 ? '/0' + date.getDate() : '/' + date.getDate()

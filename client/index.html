@@ -203,13 +203,13 @@
 			//버튼클릭하면 ON/OFF 바꾸고 소켓에 버튼 아이디 전송
 			function clickButton(button){
 				socket.emit('clickButton', button.id.replace('button_',''))
-				/* if(button.innerHTML === 'ON'){
+				if(button.innerHTML === 'ON'){
 					button.innerHTML = 'OFF'
 					button.classList.add('off')
 				}else{
 					button.innerHTML = 'ON'
 					button.classList.remove('off')
-				} */
+				}
 			}
 
 			function send() {

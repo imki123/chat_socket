@@ -20,11 +20,13 @@ io.origins((origin, callback) => {
 	callback(null, true)
 })
 
-const msgs = []
+let msgs = []
 const allClients = []
 const clients = []
 const buttons = ['yellow', true, true, true, true, true, true, true, true, true, true]
 const recents = []
+const weeks = []
+const months = []
 
 io.on('connection', (socket) => {
 	//접속 시 접속자 수 증가
@@ -33,7 +35,7 @@ io.on('connection', (socket) => {
 	address = address === '::1' ? 'admin' : `guest(${splited[2]}.${splited[3]})`
 
 	//버튼 전파
-	io.emit('buttons', buttons)
+	io.emit('buttons', { buttons, recents, weeks, months })
 
 	//버튼 클릭되면 토글해서 전파
 	socket.on('clickButton', (id) => {
@@ -51,12 +53,47 @@ io.on('connection', (socket) => {
 				}
 			}
 			//버튼이 모두 같으면 색 변경
+			let client, winner
+			//색 바꾸기 성공
 			if (changeColor) {
 				if (buttons[0] === 'yellow') buttons[0] = 'gray'
 				else buttons[0] = 'yellow'
-				//TODO : recents(최근 성공한 사람) 추가하고 emit하기 
+				//recents(최근 성공한 사람) 추가하고 emit하기
+				client = allClients.filter((i, idx) => i.socket === socket)[0].address
+				//최근 성공한 사람이 아니면 최근에 추가.
+				if (recents.length === 0 || recents[recents.length - 1].client !== client) {
+					winner = true
+					let recent = { client: client, date: new Date() }
+					recents.push(recent)
+					if (recents.length > 5) recents.shift() //최근은 5개까지만
+					//weeks에 추가하는데 이미 있으면 count ++
+					let weekIdx, monthIdx
+					for (let i = 0; i < 5; i++) {
+						//weeks 카운트 증가
+						if (weeks[i] && weeks[i].client === client) {
+							weeks[i].count++
+							weekIdx = i
+						}
+						//months 카운트 증가
+						if (months[i] && months[i].client === client) {
+							months[i].count++
+							monthIdx = i
+						}
+					}
+					//weeks에 없으면 추가하고 count 1
+					if (weekIdx === undefined) {
+						weeks.push({ ...recent, count: 1 })
+					}
+					if (monthIdx === undefined) {
+						months.push({ ...recent, count: 1 })
+					}
+				}else if(recents.length > 0 && recents[recents.length - 1].client === client){
+					winner = false
+				}
 			}
-			io.emit('buttons', buttons)
+			io.to(socket.id).emit('buttons', { buttons, recents, weeks, months, winner })
+			//나를 제외한 전체에게 접속한 사람 address를 방출
+			socket.broadcast.emit('buttons', { buttons, recents, weeks, months })
 		}
 	})
 
@@ -93,6 +130,7 @@ io.on('connection', (socket) => {
 	//메시지 입력 받으면 메시지를 msgs에 저장하고 입력 받은 메시지를 방출(emit)
 	socket.on('chat message', (msg) => {
 		let date = new Date()
+		//서버에 올리면 한국시간으로 적용.
 		if (process.env.NODE_ENV === 'production') {
 			date.setHours(date.getHours() + 9) //한국시간 : UTC + 9시간
 		}
@@ -103,7 +141,13 @@ io.on('connection', (socket) => {
 		time += date.getHours() < 10 ? ' 0' + date.getHours() : ' ' + date.getHours()
 		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()
 		msgs.push({ address, msg, time }) //msgs에 메시지들 저장
-		io.emit('chat message', { address, msg, time })
+		//대화삭제 트리거
+		if(msg === '대화삭제'){
+			msgs = []
+			io.emit('clearMsgs')
+		}else{
+			io.emit('chat message', { address, msg, time })
+		}
 	})
 })
 

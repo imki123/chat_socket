@@ -19,31 +19,16 @@
 					<div class="recent">
 						<div class="boardTitle">최근 성공</div>
 						<div class="boardList">
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
 						</div>
 					</div>
 					<div class="week">
 						<div class="boardTitle">일주일 랭킹</div>
 						<div class="boardList">
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
 						</div>
 					</div>
 					<div class="month">
 						<div class="boardTitle">한달 랭킹</div>
 						<div class="boardList">
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
-							<div>제작중</div>
 						</div>
 					</div>
 				</div>
@@ -145,10 +130,23 @@
 				font-size: 1rem;
 				padding: 2px;
 				background: rgb(168, 255, 168);
+				white-space: nowrap;
+    		overflow: hidden;
 			}
 			.boardList div{
 				width: 100%;
 				padding: 0px 5px;
+				font-size: 0.8rem;
+
+				display: flex;
+				justify-content: space-between;
+			}
+			.boardList div span:nth-child(1){
+				white-space: nowrap;
+    		overflow: hidden;
+			}
+			.boardList div span:nth-child(2){
+				padding: 2px;
 			}
 
 			.game {
@@ -160,6 +158,7 @@
 				width: 100%;
 				height: calc(40vh - 1px);
 				background: yellow;
+				border-bottom: 1px solid black;
 			}
 			.game button {
 				width: 80px;
@@ -181,7 +180,6 @@
 				position: absolute;
 				bottom: 0;
 				width: 100%;
-				border-top: 1px solid black;
 			}
 			.msgs > * {
 				padding: 5px 10px;
@@ -189,7 +187,7 @@
 			}
 			.msgs {
 				width: 100%;
-				max-height: calc(60vh - 170px);
+				max-height: calc(60vh - 171px);
 				list-style-type: none;
 				overflow-y: auto;
 			}
@@ -320,7 +318,7 @@
 				const $allClientsList = document.querySelector('.allClientsList')
 
 				//버튼 배열 받기
-				socket.on('buttons', (buttons) => {
+				socket.on('buttons', ({buttons, recents, weeks, months, winner}) => {
 					//배경색 바꾸기
 					$game.style.background = buttons[0] 
 					//버튼 바꾸기
@@ -333,6 +331,24 @@
 							button.innerHTML = 'OFF'
 							button.classList.add('off')
 						}
+					}
+					//console.log(buttons, recents, weeks, months)
+					//recents 렌더링
+					let html = ''
+					recents.forEach((i,idx)=>html += `<div><span>${idx+1}. ${i.client}</span></div>`)
+					document.querySelector('.recent .boardList').innerHTML = html
+					//weeks 렌더링
+					html = ''
+					weeks.forEach((i,idx)=>html += `<div><span>${idx+1}. ${i.client}</span><span>${i.count}</span></div>`)
+					document.querySelector('.week .boardList').innerHTML = html
+					//months 렌더링
+					html = ''
+					months.forEach((i,idx)=>html += `<div><span>${idx+1}. ${i.client}</span><span>${i.count}</span></div>`)
+					document.querySelector('.month .boardList').innerHTML = html
+					if(winner === true){
+						alert('🎉성공! 축하해요!!🎉')
+					}else if(winner === false){
+						alert('😅최근에 성공하셔서 점수가 올라가지 않았어요. 다른 분이 성공한 후에 다시 시도해주세요!')
 					}
 				})
 
@@ -416,7 +432,15 @@
 					//맨 아래로 스크롤하기
 					$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight
 				})
+
+				//clearMsgs '대화삭제' 입력하면 모든 메시지 삭제
+				socket.on('clearMsgs', () => {
+					$msgs.innerHTML = ''
+					//맨 아래로 스크롤하기
+					$msgs.scrollTop = $msgs.scrollHeight + $msgs.offsetHeight
+				})
 			}
+			
 		</script>
 	</body>
 </html>

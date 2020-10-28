@@ -9,13 +9,6 @@
 		<div class="bodyWrapper">
 			<div class="board">
 				<div class="boardContent">
-					<div class="usage">
-						<div class="boardTitle">게임 방법</div>
-						<div class="boardList">
-							<div>- 불이 켜져 있을 때는 버튼을 모두 OFF로 바꿔야합니다.</div>
-							<div>- 불이 꺼져 있을 때는 버튼을 모두 ON으로 바꿔야합니다.</div>
-						</div>
-					</div>
 					<div class="recent">
 						<div class="boardTitle">최근 성공</div>
 						<div class="boardList">
@@ -33,17 +26,23 @@
 					</div>
 				</div>
 			</div>
+			
 			<div class="game">
-				<button onclick="clickButton(this)" id="button_1">ON</button>
-				<button onclick="clickButton(this)" id="button_2">ON</button>
-				<button onclick="clickButton(this)" id="button_3">ON</button>
-				<button onclick="clickButton(this)" id="button_4">ON</button>
-				<button onclick="clickButton(this)" id="button_5">ON</button>
-				<button onclick="clickButton(this)" id="button_6">ON</button>
-				<button onclick="clickButton(this)" id="button_7">ON</button>
-				<button onclick="clickButton(this)" id="button_8">ON</button>
-				<button onclick="clickButton(this)" id="button_9">ON</button>
-				<button onclick="clickButton(this)" id="button_10">ON</button>
+				<div class="usage">
+					<button onclick="clickUsage()">게임방법</button>
+				</div>
+				<div class="buttons">
+					<button onclick="clickButton(this)" id="button_1">ON</button>
+					<button onclick="clickButton(this)" id="button_2">ON</button>
+					<button onclick="clickButton(this)" id="button_3">ON</button>
+					<button onclick="clickButton(this)" id="button_4">ON</button>
+					<button onclick="clickButton(this)" id="button_5">ON</button>
+					<button onclick="clickButton(this)" id="button_6">ON</button>
+					<button onclick="clickButton(this)" id="button_7">ON</button>
+					<button onclick="clickButton(this)" id="button_8">ON</button>
+					<button onclick="clickButton(this)" id="button_9">ON</button>
+					<button onclick="clickButton(this)" id="button_10">ON</button>
+				</div>
 			</div>
 			<div class="chat">
 				<div class="msgs"></div>
@@ -116,13 +115,13 @@
 				height: 130px;
 			}
 			.boardContent>*{
-				width: 25%;
+				width: 34%;
 				height: 100%;
 				overflow: auto;
 				border-right: 1px solid black;
 				border-bottom: 1px solid black;
 			}
-			.boardContent div:nth-child(4){
+			.boardContent div:nth-child(3){
 				border-right: 0;
 			}
 			.boardTitle{
@@ -150,17 +149,32 @@
 			}
 
 			.game {
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: center;
-				align-items: center;
-
 				width: 100%;
 				height: calc(40vh - 1px);
 				background: yellow;
 				border-bottom: 1px solid black;
+				overflow: auto;
 			}
-			.game button {
+			.usage{
+				width: 100%;
+				text-align: center;
+			}
+			.usage button{
+				background: blue;
+				color: white;
+				height: 30px;
+				width: 80px;
+				border-radius: 10px;
+				outline: none;
+			}
+			.buttons{
+				height: calc(100% - 30px);
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				align-items: center;
+			}
+			.buttons button {
 				width: 80px;
 				padding: 20px 10px;
 				margin: 1px;
@@ -171,7 +185,7 @@
 				border-radius: 20px;
 				outline: none;
 			}
-			.game button.off {
+			.buttons button.off {
 				background: black;
 				color: white;
 			}
@@ -281,6 +295,10 @@
 			//connection event
 			const socket = io() //default: window.location
 			let allClients = []
+
+			function clickUsage(){
+				alert(`1. 🔲버튼을 눌러서 ON / OFF를 변경해보세요.\n2. 불이 켜져 있을 때는 버튼을 모두 OFF로 바꿔야합니다.\n3. 불이 꺼져 있을 때는 버튼을 모두 ON으로 바꿔야합니다.\n4. 😅최근 성공했다면 점수가 올라가지 않아요. 다른 분이 성공한 후에 다시 시도해주세요!\n5. 🎉높은 점수를 얻어서 랭킹을 올려보세요!!`)
+			}
 
 			//버튼클릭하면 ON/OFF 바꾸고 소켓에 버튼 아이디 전송
 			function clickButton(button) {

@@ -8,7 +8,7 @@ const io = require('socket.io')(server, {
 })
 const cors = require('cors')
 
-const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'http://192.168.0.4:5500', 'https://socket-imki123.herokuapp.com/']
+const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'http://192.168.0.4:5500', 'https://imki123.github.io', 'https://socket-imki123.herokuapp.com/']
 let corsOptions;
 const corsOptionsDelegate = function (req, callback) {
   if (origins.indexOf(req.header('Origin')) !== -1) {

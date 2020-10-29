@@ -46,9 +46,9 @@ let msgs = []
 const allClients = []
 const clients = []
 const buttons = ['yellow', true, true, true, true, true, true, true, true, true, true]
-const recents = []
-const weeks = []
-const months = []
+let recents = []
+let weeks = []
+let months = []
 
 //io에 접속하면 현재 상태 전파
 io.on('connection', (socket) => {
@@ -181,9 +181,10 @@ io.on('connection', (socket) => {
 		}else if (msg.split(' ')[0] === '랭킹삭제') {
 			//랭킹삭제 트리거
 			let rank = Number(msg.split(' ')[1]) - 1
-			recents.splice(rank, 1)
-			weeks.splice(rank, 1)
-			months.splice(rank, 1)
+			let client = weeks[rank].client
+			recents = recents.filter(i=>i.client !== client)
+			weeks = weeks.filter(i=>i.client !== client)
+			months = months.filter(i=>i.client !== client)
 			io.emit('buttons', { buttons, recents, weeks, months })
 		}else {
 			io.emit('chat message', { address, msg, time })

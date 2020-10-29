@@ -86,7 +86,7 @@ html,body {
   overflow: hidden;
 }
 .boardList div span:nth-child(2) {
-  padding: 2px;
+  padding: 0 2px;
 }
 
 .game {

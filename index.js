@@ -1,3 +1,4 @@
+const express = require('express')
 const app = require('express')()
 const favicon = require('express-favicon')
 const http = require('http').createServer(app)
@@ -5,7 +6,8 @@ const io = require('socket.io')(http)
 
 //favicon 추가하기
 app.use(favicon(__dirname + '/client/favicon.ico'))
-
+//css 사용하기
+app.use(express.static(__dirname + '/client'));
 //open client index
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/client/index.html')
@@ -87,6 +89,8 @@ io.on('connection', (socket) => {
 					if (monthIdx === undefined) {
 						months.push({ ...recent, count: 1 })
 					}
+					weeks.sort((a,b) => b.count - a.count)
+					months.sort((a,b) => b.count - a.count)
 				}else if(recents.length > 0 && recents[recents.length - 1].client === client){
 					winner = false
 				}

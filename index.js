@@ -4,24 +4,13 @@ const favicon = require('express-favicon')
 const http = require('http').createServer(app)
 const io = require('socket.io')(http)
 
-//favicon 추가하기
-app.use(favicon(__dirname + '/client/favicon.ico'))
-//css 사용하기
-app.use(express.static(__dirname + '/client'));
 //open client index
 app.get('/', (req, res) => {
-	res.sendFile(__dirname + '/client/index.html')
+	res.sendFile(__dirname + '/index.html')
 })
 
 //make io
-//io.origins(['http://localhost:4000','https://socket-imki123.herokuapp.com/'])
-io.origins((origin, callback) => {
-	if (origin !== 'http://localhost:4000' && origin !== 'https://socket-imki123.herokuapp.com') {
-		return callback(origin, 'origin not allowed', false)
-	}
-	callback(null, true)
-})
-
+const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'https://socket-imki123.herokuapp.com/']
 let msgs = []
 const allClients = []
 const clients = []
@@ -89,9 +78,9 @@ io.on('connection', (socket) => {
 					if (monthIdx === undefined) {
 						months.push({ ...recent, count: 1 })
 					}
-					weeks.sort((a,b) => b.count - a.count)
-					months.sort((a,b) => b.count - a.count)
-				}else if(recents.length > 0 && recents[recents.length - 1].client === client){
+					weeks.sort((a, b) => b.count - a.count)
+					months.sort((a, b) => b.count - a.count)
+				} else if (recents.length > 0 && recents[recents.length - 1].client === client) {
 					winner = false
 				}
 			}
@@ -146,10 +135,10 @@ io.on('connection', (socket) => {
 		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()
 		msgs.push({ address, msg, time }) //msgs에 메시지들 저장
 		//대화삭제 트리거
-		if(msg === '대화삭제'){
+		if (msg === '대화삭제') {
 			msgs = []
 			io.emit('clearMsgs')
-		}else{
+		} else {
 			io.emit('chat message', { address, msg, time })
 		}
 	})

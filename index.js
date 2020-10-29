@@ -1,16 +1,47 @@
 const express = require('express')
 const app = require('express')()
-const favicon = require('express-favicon')
-const http = require('http').createServer(app)
-const io = require('socket.io')(http)
+const server = require('http').createServer(app)
+const cookieParser = require('cookie-parser') //라이브러리
+const bodyParser = require('body-parser')
+const io = require('socket.io')(server, {
+	cookie: true,
+})
+const cors = require('cors')
 
+const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'http://192.168.0.4:5500', 'https://socket-imki123.herokuapp.com/']
+let corsOptions;
+const corsOptionsDelegate = function (req, callback) {
+  if (origins.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = {
+			origin: true,
+			methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+			allowHeaders: ['Origin', 'Access-Control-Request-Method', 'X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Set-Cookie'],
+			credentials: true,
+		} // reflect (enable) the requested origin in the CORS response
+  } else {
+    corsOptions = {origin: false} // disable CORS for this request
+  }
+  callback(null, corsOptions) // callback expects two parameters: error and options
+}
+app.use(cookieParser())
+app.use(bodyParser.json())
+app.use(cors(corsOptionsDelegate))
 //open client index
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/index.html')
 })
 
+app.post('/getCookie', (req,res)=>{
+	res.send(req.cookies)
+})
+
+app.post('/setCookie', (req, res) => {
+	res.cookie('client', req.body.client)
+	res.end('setCookie')
+})
+
 //make io
-const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'https://socket-imki123.herokuapp.com/']
+
 let msgs = []
 const allClients = []
 const clients = []
@@ -19,14 +50,20 @@ const recents = []
 const weeks = []
 const months = []
 
+//io에 접속하면 현재 상태 전파
 io.on('connection', (socket) => {
-	//접속 시 접속자 수 증가
+	//접속 시 address 만들고 접속자 수 증가
 	let address = socket.handshake.address //get IP
 	let splited = address.split('.')
 	address = address === '::1' ? 'admin' : `guest(${splited[2]}.${splited[3]})`
 
-	//버튼 전파
+	//버튼, 기록들 전파
 	io.emit('buttons', { buttons, recents, weeks, months })
+
+	//접속자 목록 전파
+	allClients.push({ socket, address })
+	clients.push(address)
+	io.emit('allClients', { clients })
 
 	//버튼 클릭되면 토글해서 전파
 	socket.on('clickButton', (id) => {
@@ -44,13 +81,13 @@ io.on('connection', (socket) => {
 				}
 			}
 			//버튼이 모두 같으면 색 변경
-			let client, winner
+			let winner
 			//색 바꾸기 성공
 			if (changeColor) {
 				if (buttons[0] === 'yellow') buttons[0] = 'gray'
 				else buttons[0] = 'yellow'
 				//recents(최근 성공한 사람) 추가하고 emit하기
-				client = allClients.filter((i, idx) => i.socket === socket)[0].address
+				client = allClients[findClient(allClients, socket)].address
 				//최근 성공한 사람이 아니면 최근에 추가.
 				if (recents.length === 0 || recents[recents.length - 1].client !== client) {
 					winner = true
@@ -90,25 +127,27 @@ io.on('connection', (socket) => {
 		}
 	})
 
-	//접속자 목록 전파
-	allClients.push({ socket, address })
-	clients.push(address)
-	io.emit('allClients', { clients })
+	//닉네임 변경시 allClients 변경하고 전파
+	socket.on('rename', (client) => {
+		console.log('닉네임 변경:',client)
+		let clientIdx = findClient(allClients, socket)
+		allClients[clientIdx].address = client
+		clients[clientIdx] = client
+		address = client
+		io.emit('allClients', { clients })
+		io.to(socket.id).emit('rename', { client: address, isMe: true })
+		socket.broadcast.emit('rename', { client: address, isMe: false })
+	})
 
 	//접속해제 시 접속자 수 감소
 	socket.on('disconnect', function () {
 		let num = allClients.length
-		let client
-		allClients.filter((i, idx) => {
-			if (i.socket === socket) {
-				client = idx
-				return true
-			} else return false
-		})
+		//접속해제한 사람 찾아서 제거
+		let clientIdx = findClient(allClients, socket)
 		let clientAddress
-		if (client !== undefined) {
-			clientAddress = allClients.splice(client, 1)[0].address
-			clients.splice(client, 1)
+		if (clientIdx !== undefined) {
+			clientAddress = allClients.splice(clientIdx, 1)[0].address
+			clients.splice(clientIdx, 1)
 		}
 		socket.broadcast.emit('allClients', { address: clientAddress, clients })
 	})
@@ -144,16 +183,28 @@ io.on('connection', (socket) => {
 	})
 })
 
+//올클라이언츠와 소켓을 받아서 idx찾아내기
+function findClient(allClients, socket) {
+	let clientIdx
+	allClients.filter((i, idx) => {
+		if (i.socket === socket) {
+			clientIdx = idx
+			return true
+		} else return false
+	})
+	return clientIdx
+}
+
 //open Server
 const port = process.env.PORT || 4000
-http.listen(port, () => {
+server.listen(port, () => {
 	console.log(`Listening on port: ${port}\nConnect to http://localhost:${port}`)
 })
 
 //heroku sleep 방지
 if (process.env.NODE_ENV === 'production') {
-	const myhttp = require('http')
+	const http = require('http')
 	setInterval(function () {
-		myhttp.get('http://socket-imki123.herokuapp.com')
+		http.get('http://socket-imki123.herokuapp.com')
 	}, 1000 * 60 * 10) //10분
 }

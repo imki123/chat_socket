@@ -36,7 +36,7 @@ app.post('/getCookie', (req,res)=>{
 })
 
 app.post('/setCookie', (req, res) => {
-	res.cookie('client', req.body.client)
+	res.cookie('client', req.body.client,{ secure: true, sameSite: 'None'})
 	res.end('setCookie')
 })
 

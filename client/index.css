@@ -132,18 +132,19 @@ html,body {
 }
 
 .chat {
-  position: absolute;
-  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
   width: 100%;
   height: calc(60% - 103px);
-  overflow: auto;
 }
 .msgs > * {
   padding: 5px 10px;
   width: 100%;
 }
 .msgs {
-  height: calc(100% - 40px);
+  max-height: calc(100% - 40px);
   width: 100%;
   list-style-type: none;
   overflow-y: auto;

@@ -9,19 +9,19 @@ const io = require('socket.io')(server, {
 const cors = require('cors')
 
 const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'http://192.168.0.4:5500', 'https://imki123.github.io', 'https://socket-imki123.herokuapp.com/']
-let corsOptions;
+let corsOptions
 const corsOptionsDelegate = function (req, callback) {
-  if (origins.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = {
+	if (origins.indexOf(req.header('Origin')) !== -1) {
+		corsOptions = {
 			origin: true,
 			methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 			allowHeaders: ['Origin', 'Access-Control-Request-Method', 'X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept', 'Set-Cookie'],
 			credentials: true,
 		} // reflect (enable) the requested origin in the CORS response
-  } else {
-    corsOptions = {origin: false} // disable CORS for this request
-  }
-  callback(null, corsOptions) // callback expects two parameters: error and options
+	} else {
+		corsOptions = { origin: false } // disable CORS for this request
+	}
+	callback(null, corsOptions) // callback expects two parameters: error and options
 }
 app.use(cookieParser())
 app.use(bodyParser.json())
@@ -31,12 +31,12 @@ app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/index.html')
 })
 
-app.post('/getCookie', (req,res)=>{
+app.post('/getCookie', (req, res) => {
 	res.send(req.cookies)
 })
 
 app.post('/setCookie', (req, res) => {
-	res.cookie('client', req.body.client,{ secure: true, sameSite: 'None'})
+	res.cookie('client', req.body.client, { secure: true, sameSite: 'None' })
 	res.end('setCookie')
 })
 
@@ -129,7 +129,7 @@ io.on('connection', (socket) => {
 
 	//닉네임 변경시 allClients 변경하고 전파
 	socket.on('rename', (client) => {
-		console.log('닉네임 변경:',client)
+		console.log('닉네임 변경:', client)
 		let clientIdx = findClient(allClients, socket)
 		allClients[clientIdx].address = client
 		clients[clientIdx] = client
@@ -173,13 +173,23 @@ io.on('connection', (socket) => {
 		time += date.getHours() < 10 ? ' 0' + date.getHours() : ' ' + date.getHours()
 		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()
 		msgs.push({ address, msg, time }) //msgs에 메시지들 저장
+
 		//대화삭제 트리거
 		if (msg === '대화삭제') {
 			msgs = []
 			io.emit('clearMsgs')
-		} else {
+		}else if (msg.split(' ')[0] === '랭킹삭제') {
+			//랭킹삭제 트리거
+			let rank = Number(msg.split(' ')[1]) - 1
+			recents.splice(rank, 1)
+			weeks.splice(rank, 1)
+			months.splice(rank, 1)
+			io.emit('buttons', { buttons, recents, weeks, months })
+		}else {
 			io.emit('chat message', { address, msg, time })
 		}
+
+		
 	})
 })
 

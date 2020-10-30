@@ -17,7 +17,6 @@ let recents = []
 let weeks = []
 let months = []
 
-
 const origins = ['http://localhost:4000', 'http://127.0.0.1:5500', 'http://192.168.0.4:5500', 'https://imki123.github.io', 'https://socket-imki123.herokuapp.com/']
 let corsOptions
 const corsOptionsDelegate = function (req, callback) {
@@ -88,7 +87,9 @@ io.on('connection', (socket) => {
 				if (buttons[0] === 'yellow') buttons[0] = 'gray'
 				else buttons[0] = 'yellow'
 				//recents(최근 성공한 사람) 추가하고 emit하기
-				client = allClients[findClient(allClients, socket)].address
+				let clientIdx = findClientIdx(address)
+				console.log('clientIdx',clientIdx, address)
+				client = allClients[clientIdx].address
 				winner = true
 				let recent = { client: client, date: new Date() }
 				recents.push(recent)
@@ -124,9 +125,9 @@ io.on('connection', (socket) => {
 					winner = false
 				} */
 			}
-			
+
+			//버튼, 랭킹 정보 전파
 			io.to(socket.id).emit('buttons', { buttons, recents, weeks, months, winner })
-			//나를 제외한 전체에게 접속한 사람 address를 방출
 			socket.broadcast.emit('buttons', { buttons, recents, weeks, months })
 		}
 	})
@@ -134,20 +135,35 @@ io.on('connection', (socket) => {
 	//닉네임 변경시 allClients 변경하고 전파
 	socket.on('rename', (client) => {
 		console.log('닉네임 변경:', client)
-		let clientIdx = findClient(allClients, socket)
-		allClients[clientIdx].address = client
-		clients[clientIdx] = client
+		let clientIdx = findClientIdx(client)
+		if(clientIdx === undefined){
+			allClients.push({socket, address})
+			clients.push(client)
+		}else{
+			allClients[clientIdx].address = client
+			clients[clientIdx] = client
+		}
 		address = client
-		io.emit('allClients', { clients })
-		io.to(socket.id).emit('rename', { client: address, isMe: true })
-		socket.broadcast.emit('rename', { client: address, isMe: false })
+		if (blackLists.indexOf(client) > -1) {
+			//블랙리스트면 닉네임 변경은 되지만 전파하지 않고 클라이언츠에서도 삭제
+			allClients.splice(clientIdx, 1)
+			clients.splice(clientIdx, 1)
+			io.emit('allClients', { clients })
+			io.to(socket.id).emit('rename', { client: address, isMe: true })
+		} else {
+			io.emit('allClients', { clients })
+			io.to(socket.id).emit('rename', { client: address, isMe: true })
+			socket.broadcast.emit('rename', { client: address, isMe: false })
+		}
+
+		
 	})
 
 	//접속해제 시 접속자 수 감소
 	socket.on('disconnect', function () {
 		let num = allClients.length
 		//접속해제한 사람 찾아서 제거
-		let clientIdx = findClient(allClients, socket)
+		let clientIdx = findClientIdx(address)
 		let clientAddress
 		if (clientIdx !== undefined) {
 			clientAddress = allClients.splice(clientIdx, 1)[0].address
@@ -165,7 +181,8 @@ io.on('connection', (socket) => {
 
 	//메시지 입력 받으면 메시지를 msgs에 저장하고 입력 받은 메시지를 방출(emit)
 	socket.on('chat message', (msg) => {
-		if(blackLists.indexOf(address) > -1){ //닉네임이 블랙리스트에 있으면 채팅 불가
+		if (blackLists.indexOf(address) > -1) {
+			//닉네임이 블랙리스트에 있으면 채팅 불가
 			return
 		}
 		let date = new Date()
@@ -179,36 +196,56 @@ io.on('connection', (socket) => {
 		time += date.getDate() < 10 ? '/0' + date.getDate() : '/' + date.getDate()
 		time += date.getHours() < 10 ? ' 0' + date.getHours() : ' ' + date.getHours()
 		time += date.getMinutes() < 10 ? ':0' + date.getMinutes() : ':' + date.getMinutes()
-		msgs.push({ address, msg, time }) //msgs에 메시지들 저장
 
-		//대화삭제 트리거
+		//대화삭제 닉네임 트리거
 		if (msg.split(' ')[0] === '대화삭제') {
-			msgs = msgs.filter(i=> i.address !== msg.split(' ')[1])
-			io.emit('clearMsgs') //채팅창 지우고
-			setTimeout(function(){
-				io.to(socket.id).emit('get msgs', msgs) //새로 변경된 메시지 방출
-			})
-			blackLists.push(msg.split(' ')[1]) //블랙리스트에 추가
-		}else if (msg.split(' ')[0] === '랭킹삭제') {
-			//랭킹삭제 트리거
+			let client = msg.split(' ')[1]
+			addBlackLists(client, socket)
+		} else if (msg.split(' ')[0] === '랭킹삭제') {
+			//랭킹삭제 month랭킹번호 트리거
 			let rank = Number(msg.split(' ')[1]) - 1
 			let client = months[rank].client
-			recents = recents.filter(i=>i.client !== client)
-			weeks = weeks.filter(i=>i.client !== client)
-			months = months.filter(i=>i.client !== client)
-			io.emit('buttons', { buttons, recents, weeks, months })
-			blackLists.push(client) //블랙리스트에 추가
-		}else {
+			addBlackLists(client, socket)
+		} else {
+			msgs.push({ address, msg, time }) //msgs에 메시지들 저장
 			io.emit('chat message', { address, msg, time })
 		}
 	})
 })
 
-//올클라이언츠와 소켓을 받아서 idx찾아내기
-function findClient(allClients, socket) {
+//블랙리스트 추가하기. 접속자 삭제, 대화 삭제, 랭킹 삭제
+function addBlackLists(client) {
+	//블랙리스트에 추가
+	blackLists.push(client) 
+	console.log('블랙리스트 등록:',client)
+
+	//접속자에서 삭제
+	let clientIdx = findClientIdx(client)
+	if(clientIdx !== undefined){
+		allClients.splice(clientIdx,1)
+		clients.splice(clientIdx,1)
+		io.emit('allClients', { clients })
+	}
+
+	//채팅창 지우고
+	msgs = msgs.filter((i) => i.address !== client)
+	io.emit('clearMsgs') 
+	setTimeout(function () {
+		io.emit('get msgs', msgs) //새로 변경된 메시지 방출
+	},100)
+
+	//최근성공, 랭킹에서도 삭제
+	recents = recents.filter((i) => i.client !== client)
+	weeks = weeks.filter((i) => i.client !== client)
+	months = months.filter((i) => i.client !== client)
+	io.emit('buttons', { buttons, recents, weeks, months })
+}
+
+//client를 받아서 idx찾아내기
+function findClientIdx(client) {
 	let clientIdx
 	allClients.filter((i, idx) => {
-		if (i.socket === socket) {
+		if (i.address === client) {
 			clientIdx = idx
 			return true
 		} else return false

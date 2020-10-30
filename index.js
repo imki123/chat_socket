@@ -88,7 +88,6 @@ io.on('connection', (socket) => {
 				else buttons[0] = 'yellow'
 				//recents(최근 성공한 사람) 추가하고 emit하기
 				let clientIdx = findClientIdx(address)
-				console.log('clientIdx',clientIdx, address)
 				client = allClients[clientIdx].address
 				winner = true
 				let recent = { client: client, date: new Date() }
@@ -135,7 +134,7 @@ io.on('connection', (socket) => {
 	//닉네임 변경시 allClients 변경하고 전파
 	socket.on('rename', (client) => {
 		console.log('닉네임 변경:', client)
-		let clientIdx = findClientIdx(client)
+		let clientIdx = findSocketIdx(socket)
 		if(clientIdx === undefined){
 			allClients.push({socket, address})
 			clients.push(client)
@@ -243,9 +242,22 @@ function addBlackLists(client) {
 
 //client를 받아서 idx찾아내기
 function findClientIdx(client) {
+	console.log(client)
 	let clientIdx
 	allClients.filter((i, idx) => {
 		if (i.address === client) {
+			clientIdx = idx
+			return true
+		} else return false
+	})
+	return clientIdx
+}
+
+//socket을 받아서 idx찾아내기
+function findSocketIdx(socket) {
+	let clientIdx
+	allClients.filter((i, idx) => {
+		if (i.socket === socket) {
 			clientIdx = idx
 			return true
 		} else return false

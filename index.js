@@ -87,7 +87,7 @@ io.on('connection', (socket) => {
 				if (buttons[0] === 'yellow') buttons[0] = 'gray'
 				else buttons[0] = 'yellow'
 				//recents(최근 성공한 사람) 추가하고 emit하기
-				let clientIdx = findClientIdx(address)
+				let clientIdx = findSocketIdx(socket)
 				client = allClients[clientIdx].address
 				winner = true
 				let recent = { client: client, date: new Date() }
@@ -162,7 +162,7 @@ io.on('connection', (socket) => {
 	socket.on('disconnect', function () {
 		let num = allClients.length
 		//접속해제한 사람 찾아서 제거
-		let clientIdx = findClientIdx(address)
+		let clientIdx = findSocketIdx(socket)
 		let clientAddress
 		if (clientIdx !== undefined) {
 			clientAddress = allClients.splice(clientIdx, 1)[0].address
